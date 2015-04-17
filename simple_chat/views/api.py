@@ -131,8 +131,9 @@ def msgs_apis():
                 import transaction
                 with transaction.manager:
                     channel = chat_model.create_channel(user, receiver)
-            ts = request_values.get('ts')
-            msgs = chat_model.get_msgs(channel.guid, timestamp=ts)
+            ts = int(request_values.get('ts'))
+            limit = int(request_values.get('limit', 10))
+            msgs = chat_model.get_msgs(channel.guid, timestamp=ts, limit=limit)
             data = dict(status=1, data=[msg.as_dict() for msg in msgs])
         except Exception as err:
             logger.warn('Error: %r', err)

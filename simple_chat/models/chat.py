@@ -1,10 +1,15 @@
 from __future__ import unicode_literals
 
+from datetime import datetime
+
+from sqlalchemy import and_, or_
+
 from ..utils import GuidFactory
 from . import tables
 from .base import BaseTableModel
 from .base import NOT_SET
-from sqlalchemy import and_, or_
+
+
 
 
 class ChatModel(BaseTableModel):
@@ -50,6 +55,7 @@ class ChatModel(BaseTableModel):
             .query(tables.Message)\
             .filter_by(channel_guid=channel_guid)
         if timestamp:
-            msgs = msgs.filter(tables.Message.created_at<=channel_guid)
+            msgs = msgs.filter(
+                tables.Message.created_at<=datetime.fromtimestamp(timestamp))
         return msgs.limit(limit)
 
