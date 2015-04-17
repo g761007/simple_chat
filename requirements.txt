@@ -1,0 +1,7 @@
+waitress
+flask
+pyyaml
+sqlalchemy
+zope.sqlalchemy
+tornado
+pymongo
