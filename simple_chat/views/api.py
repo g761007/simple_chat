@@ -58,12 +58,23 @@ def user_list():
     logger.debug('user list')
     if request.method == 'GET':
         try:
+            request_values = request.values
             user_model = model_factory.user_model
+            access_token = request_values['access_token']
+            user = user_model.get_by_access_token(access_token)
+            if not user:
+                return jsonify(status=0, error='Error access token')
+            user_model = model_factory.user_model
+            access_token = request_values['access_token']
+            owner = user_model.get_by_access_token(access_token)
+            if not owner:
+                return jsonify(status=0, error='Error access token')
             users = user_model.get_list()
             data = dict(status=1, data=[dict(user_name=user.user_name,
                                       avatar=user.avatar,
                                       updated_at=user.updated_at
-                            ) for user in users])
+                            ) for user in users \
+                                        if user.user_name != owner.user_name])
         except Exception as err:
             logger.warn('Error: %r', err)
             data = dict(status=0, error='{}'.format(err))
