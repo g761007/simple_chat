@@ -131,7 +131,9 @@ def msgs_apis():
                 import transaction
                 with transaction.manager:
                     channel = chat_model.create_channel(user, receiver)
-            ts = int(request_values.get('ts'))
+            ts = request_values.get('ts')
+            if ts is not None:
+                ts = int(ts)
             limit = int(request_values.get('limit', 10))
             msgs = chat_model.get_msgs(channel.guid, timestamp=ts, limit=limit)
             data = dict(status=1, data=[msg.as_dict() for msg in msgs])
@@ -141,18 +143,21 @@ def msgs_apis():
         return jsonify(**data)
     abort(403)
 
-@api.route('/test', methods=['GET'])
-def create_users():
+@api.route('/test_users', methods=['POST'])
+def create_test_users():
+    from simple_chat.utils import make_guid
     import transaction
     with transaction.manager:
         user_model = model_factory.user_model
         for i in range(10):
+            user_name = make_guid()[-6:]
             user = user_model.create(
-                user_name='test_user%d' % i,
-                display_name='test_user%d' % i,
-                email='test_user%d@test.com' % i,
+                user_name=user_name,
+                display_name=user_name,
+                email='%s@test.com' % user_name,
+                avatar='http://z.m.ipimg.com/-150c-/8/D/8/7/0/4/1/B/8D87041BE46F9711B4BBA88B3409C1EB.jpg',
                 password='123456',
                 verified=True,
             )
-            logger.info('Created admin, guid=%s' % user.guid)
+            logger.info('Created user, guid=%s' % user.guid)
     return 'ok'

@@ -80,6 +80,7 @@ class UserModel(BaseTableModel):
         display_name,
         password,
         email,
+        avatar='',
         verified=False, 
     ):
         """Create a new user and return verification
@@ -94,7 +95,8 @@ class UserModel(BaseTableModel):
             guid=self.guid_factory(),
             user_name=unicode(user_name),
             email=unicode(email),
-            display_name=unicode(display_name), 
+            display_name=unicode(display_name),
+            avatar=avatar,
             password=salted_password,
             created_at=tables.now_func(),
             verified=verified, 
