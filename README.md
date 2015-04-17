@@ -103,7 +103,7 @@ access_token: string # 自己的access token
 
 user_name: string # 接收者user_name
 
-timestamp: int # 時間戳記, optional
+ts: int # 時間戳記, optional
 
 limit: int # 筆數, optional, default=10
 
