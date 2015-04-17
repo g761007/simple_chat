@@ -99,9 +99,13 @@ msg: string # 訊息
 ## 取得聊天訊息 [GET] /msgs
 
 ### 參數
-user_name: string # user's account
+access_token: string # 自己的access token
 
-password: string # user's password
+user_name: string # 接收者user_name
+
+timestamp: int # 時間戳記, optional
+
+limit: int # 筆數, optional, default=10
 
 ### 回應
 
