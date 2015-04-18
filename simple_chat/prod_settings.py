@@ -26,7 +26,7 @@ WRITE_DATABASE_URI = READ_DATABASE_URI
 #: Use same database for reading and writing
 READ_WRITE_SAME = True
 
-VERSION = '0.0.0'
+VERSION = '0.0.1'
 
 #: API kyes
 API_KEYS = set([

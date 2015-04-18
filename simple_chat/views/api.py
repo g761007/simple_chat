@@ -20,7 +20,7 @@ def version():
     logger.debug('version')
     if request.method == 'GET':
         from ..default_settings import VERSION
-        return jsonify(data=dict(version=VERSION))
+        return jsonify(status=1, version=VERSION)
     abort(403)
 
 
