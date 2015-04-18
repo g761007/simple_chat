@@ -67,17 +67,16 @@ def login():
                 password = request_form['password']
                 user_model = model_factory.user_model
                 user = user_model.get_by_name(user_name)
-
                 if user_model.validate_password(user, password):
-                    from simple_chat.utils import make_guid
+                    from ..utils import make_guid
                     user_model.update(user, access_token=make_guid())
-                    data = dict(status=1,
-                                data=dict(user_name=user.user_name,
-                                          avatar=user.avatar,
-                                          access_token=user.access_token,
-                                          create_at=str(user.created_at),
-                                          updated_at=str(user.updated_at)
-                                ))
+                    return jsonify(
+                        status=1,
+                        data=dict(user_name=user.user_name,
+                                  avatar=user.avatar,
+                                  access_token=user.access_token,
+                                  updated_at=str(user.updated_at)
+                        ))
         except Exception as err:
             logger.error('Error: %r', err)
             data = dict(status=-1, message='{}'.format(err))
@@ -125,12 +124,16 @@ def send_msg():
             if not receiver:
                 return jsonify(status=0, error='No user:%s' % user_name)
 
-            chat_model = model_factory.chat_model
-            channel = chat_model.get_channel(poster.guid, receiver.guid)
+            channel_model = model_factory.channel_model
+            message_model = model_factory.message_model
+            channel = channel_model.get_channel(poster.guid, receiver.guid)
             if not channel:
-                channel = chat_model.create_channel(poster, receiver)
+                channel = channel_model.create_channel(poster.guid,
+                                                       receiver.guid)
             msg = request_form.get('msg')
-            message = chat_model.add_msg(poster=poster, channel=channel, msg=msg)
+            message = message_model.add_msg(poster=poster,
+                                         channel=channel,
+                                         msg=msg)
             data = dict(status=1, data=message.as_dict())
     except Exception as err:
         logger.error('Error: %r', err)
@@ -151,17 +154,18 @@ def get_msgs():
         if not receiver:
             return jsonify(status=0, error='No user:%s' % user_name)
 
-        chat_model = model_factory.chat_model
-        channel = chat_model.get_channel(user.guid, receiver.guid)
+        channel_model = model_factory.channel_model
+        message_model = model_factory.message_model
+        channel = channel_model.get_channel(user.guid, receiver.guid)
         if not channel:
             import transaction
             with transaction.manager:
-                channel = chat_model.create_channel(user, receiver)
+                channel = channel_model.create_channel(user.guid, receiver.guid)
         ts = request_values.get('ts')
         if ts is not None:
             ts = int(ts)
         limit = int(request_values.get('limit', 10))
-        msgs = chat_model.get_msgs(channel.guid, timestamp=ts, limit=limit)
+        msgs = message_model.get_msgs(channel.guid, timestamp=ts, limit=limit)
         data = dict(status=1, data=[msg.as_dict() for msg in msgs])
     except Exception as err:
         logger.error('Error: %r', err)
