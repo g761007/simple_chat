@@ -49,6 +49,7 @@ def signup():
                     )
                 user = user_model.create(**params)
                 return jsonify(status=1, data=dict(guid=user.guid,
+                                                   user_name=user.user_name,
                                                    created_at=user.created_at))
         except Exception as err:
             logger.error('Error: %r', err)
@@ -67,6 +68,8 @@ def login():
                 password = request_form['password']
                 user_model = model_factory.user_model
                 user = user_model.get_by_name(user_name)
+                if user is None:
+                    return jsonify(status=0, error='No user:%s' % user_name)
                 if user_model.validate_password(user, password):
                     from ..utils import make_guid
                     user_model.update(user, access_token=make_guid())
