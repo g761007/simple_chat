@@ -184,19 +184,23 @@ def msgs():
 
 @api.route('/test_users', methods=['POST'])
 def create_test_users():
-    from simple_chat.utils import make_guid
-    import transaction
-    with transaction.manager:
-        user_model = model_factory.user_model
-        for i in range(10):
-            user_name = make_guid()[-6:]
-            user = user_model.create(
-                user_name=user_name,
-                display_name=user_name,
-                email='%s@test.com' % user_name,
-                avatar='http://z.m.ipimg.com/-150c-/8/D/8/7/0/4/1/B/8D87041BE46F9711B4BBA88B3409C1EB.jpg',
-                password='123456',
-                verified=True,
-            )
-            logger.info('Created user, guid=%s' % user.guid)
-    return 'ok'
+    if request.method == 'POST':
+        import random
+        import transaction
+        prefix = request.form.get('prefix', 'testuser')
+        cnt = int(request.form.get('cnt', 10))
+        with transaction.manager:
+            user_model = model_factory.user_model
+            for i in range(1, cnt+1):
+                name = '%s%d' % (prefix, i)
+                user = user_model.create(
+                    user_name=name,
+                    display_name=name,
+                    gender=random.randrange(0,2),
+                    age=random.randrange(18,100),
+                    avatar='http://z.m.ipimg.com/-150c-/8/D/8/7/0/4/1/B/8D87041BE46F9711B4BBA88B3409C1EB.jpg',
+                    password='123456'
+                )
+                logger.info('Created user %s, guid=%s', name, user.guid)
+        return 'ok'
+    abort(403)
