@@ -1,25 +1,35 @@
-README
-==================
+# README
+## Getting Started
+```
 
-Getting Started
----------------
+deploy
+pip install -r requirement.txt
+pip install -r test-requirement.txt
+python setup.py develop
 
-- initdb: python setup.py initdb
-- Run server: python setup.py runapp
+initdb: python setup.py initdb
+Run server: python setup.py runapp
+
+```
+
+## APIs
+API | 方法 | URL
+---- |----- | -----
+使用者登入 | POST | /login
+使用者清單 | GET | /users
+傳送訊息 | POST | /msgs
+取得訊息 | GET | /msgs
 
 
-APIs
-------------------
+### 使用者登入 [POST] /login
 
-## 使用者登入 [POST] /login
-
-### 參數
+#### 參數
 名稱 | 型態 | 說明
 ---- |----- | -----
 user_name | string | user's account
 password | string | user's password
 
-### 回應
+#### 回應
 ```
 {
     "data": {
@@ -34,14 +44,14 @@ password | string | user's password
 ```
 
 
-## 使用者清單 [GET] /users
+### 使用者清單 [GET] /users
 
-### 參數
+#### 參數
 名稱 | 型態 | 說明
 ---- |----- | -----
 access_token | string | 自己的access token
 
-### 回應
+#### 回應
 ```
 {
     "data": [
@@ -66,16 +76,16 @@ access_token | string | 自己的access token
 ```
 
 
-## 傳送訊息 [POST] /msgs
+### 傳送訊息 [POST] /msgs
 
-### 參數
+#### 參數
 名稱 | 型態 | 說明
 ---- |----- | -----
 access_token | string | 自己的access token
 user_name | string | 接收者user_name
 msg | string | 訊息
 
-### 回應
+#### 回應
 ```
 {
     "data": [
@@ -98,9 +108,9 @@ msg | string | 訊息
 }
 ```
 
-## 取得聊天訊息 [GET] /msgs
+### 取得聊天訊息 [GET] /msgs
 
-### 參數
+#### 參數
 名稱 | 型態 | 說明
 ---- |----- | -----
 access_token | string | 自己的access token
@@ -111,7 +121,7 @@ ts | int | 時間戳記, optional
 
 limit | int | 筆數, optional, default=10
 
-### 回應
+#### 回應
 
 ```
 {
