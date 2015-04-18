@@ -7,8 +7,9 @@ from flask import request
 from flask import jsonify
 from flask import abort
 
-from simple_chat.models.database import write_session
-from simple_chat.models.model_factory import ModelFactory
+from ..models.database import write_session
+from ..models.model_factory import ModelFactory
+
 model_factory = ModelFactory(write_session)
 
 api = Module(__name__)
@@ -22,6 +23,37 @@ def version():
         return jsonify(data=dict(version=VERSION))
     abort(403)
 
+
+@api.route('/signup', methods=['POST'])
+def signup():
+    logger.debug('signup')
+    if request.method == 'POST':
+        try:
+            import transaction
+            with transaction.manager:
+                request_form = request.form
+                params = dict(
+                    user_name=request_form['user_name'],
+                    display_name=request_form['display_name'],
+                    password=request_form['password'],
+                    age=int(request_form['age']),
+                    gender=int(request_form['gender']),
+                    avatar=request_form['avatar']
+                )
+                user_model = model_factory.user_model
+                user = user_model.get_by_name(params['user_name'])
+                if user is not None:
+                    return jsonify(
+                        status=-1,
+                        message='username (%s) does exist' % params['user_name']
+                    )
+                user = user_model.create(**params)
+                return jsonify(status=1, data=dict(guid=user.guid,
+                                                   created_at=user.created_at))
+        except Exception as err:
+            logger.error('Error: %r', err)
+            data = dict(status=-1, message='{}'.format(err))
+    abort(403)
 
 @api.route('/login', methods=['POST'])
 def login():
@@ -47,7 +79,7 @@ def login():
                                           updated_at=str(user.updated_at)
                                 ))
         except Exception as err:
-            logger.warn('Error: %r', err)
+            logger.error('Error: %r', err)
             data = dict(status=-1, message='{}'.format(err))
         return jsonify(**data)
     abort(403)
@@ -60,88 +92,91 @@ def user_list():
         try:
             request_values = request.values
             user_model = model_factory.user_model
-            access_token = request_values['access_token']
-            user = user_model.get_by_access_token(access_token)
-            if not user:
-                return jsonify(status=0, error='Error access token')
-            user_model = model_factory.user_model
-            access_token = request_values['access_token']
-            owner = user_model.get_by_access_token(access_token)
-            if not owner:
-                return jsonify(status=0, error='Error access token')
+            if not request_values.get('debug'):
+                # FIXME: refacotring this
+                access_token = request_values['access_token']
+                owner = user_model.get_by_access_token(access_token)
+                if not owner:
+                    return jsonify(status=0, error='Error access token')
             users = user_model.get_list()
             data = dict(status=1, data=[dict(user_name=user.user_name,
                                       avatar=user.avatar,
                                       updated_at=user.updated_at
-                            ) for user in users \
-                                        if user.user_name != owner.user_name])
+                            ) for user in users])
         except Exception as err:
-            logger.warn('Error: %r', err)
-            data = dict(status=0, error='{}'.format(err))
+            logger.error('Error: %r', err)
+            data = dict(status=-1, error='{}'.format(err))
         return jsonify(**data)
     abort(403)
 
 
-@api.route('/msgs', methods=['POST', 'GET'])
-def msgs_apis():
-    logger.debug('send_msg')
-    if request.method == 'POST':
-        try:
-            import transaction
-            with transaction.manager:
-                request_form = request.form
-                user_model = model_factory.user_model
-                access_token = request_form['access_token']
-                poster = user_model.get_by_access_token(access_token)
-                if not poster:
-                    return jsonify(status=0, error='Error access token')
-                user_name = request_form['user_name']
-                receiver = user_model.get_by_name(user_name)
-                if not receiver:
-                    return jsonify(status=0, error='No user:%s' % user_name)
-
-                chat_model = model_factory.chat_model
-                channel = chat_model.get_channel(poster.guid, receiver.guid)
-                if not channel:
-                    channel = chat_model.create_channel(poster, receiver)
-                msg = request_form.get('msg')
-                message = chat_model.add_msg(poster=poster, channel=channel, msg=msg)
-                data = dict(status=1, data=message.as_dict())
-        except Exception as err:
-            logger.warn('Error: %r', err)
-            data = dict(status=0, error='{}'.format(err))
-        return jsonify(**data)
-    elif request.method == 'GET':
-        try:
-            request_values = request.values
+def send_msg():
+    try:
+        import transaction
+        with transaction.manager:
+            request_form = request.form
             user_model = model_factory.user_model
-            access_token = request_values['access_token']
-            user = user_model.get_by_access_token(access_token)
-            if not user:
+            access_token = request_form['access_token']
+            poster = user_model.get_by_access_token(access_token)
+            if not poster:
                 return jsonify(status=0, error='Error access token')
-
-            user_name = request_values['user_name']
+            user_name = request_form['user_name']
             receiver = user_model.get_by_name(user_name)
             if not receiver:
                 return jsonify(status=0, error='No user:%s' % user_name)
 
             chat_model = model_factory.chat_model
-            channel = chat_model.get_channel(user.guid, receiver.guid)
+            channel = chat_model.get_channel(poster.guid, receiver.guid)
             if not channel:
-                import transaction
-                with transaction.manager:
-                    channel = chat_model.create_channel(user, receiver)
-            ts = request_values.get('ts')
-            if ts is not None:
-                ts = int(ts)
-            limit = int(request_values.get('limit', 10))
-            msgs = chat_model.get_msgs(channel.guid, timestamp=ts, limit=limit)
-            data = dict(status=1, data=[msg.as_dict() for msg in msgs])
-        except Exception as err:
-            logger.warn('Error: %r', err)
-            data = dict(status=0, error='{}'.format(err))
-        return jsonify(**data)
+                channel = chat_model.create_channel(poster, receiver)
+            msg = request_form.get('msg')
+            message = chat_model.add_msg(poster=poster, channel=channel, msg=msg)
+            data = dict(status=1, data=message.as_dict())
+    except Exception as err:
+        logger.error('Error: %r', err)
+        data = dict(status=-1, error='{}'.format(err))
+    return jsonify(**data)
+
+def get_msgs():
+    try:
+        request_values = request.values
+        user_model = model_factory.user_model
+        access_token = request_values['access_token']
+        user = user_model.get_by_access_token(access_token)
+        if not user:
+            return jsonify(status=0, error='Error access token')
+
+        user_name = request_values['user_name']
+        receiver = user_model.get_by_name(user_name)
+        if not receiver:
+            return jsonify(status=0, error='No user:%s' % user_name)
+
+        chat_model = model_factory.chat_model
+        channel = chat_model.get_channel(user.guid, receiver.guid)
+        if not channel:
+            import transaction
+            with transaction.manager:
+                channel = chat_model.create_channel(user, receiver)
+        ts = request_values.get('ts')
+        if ts is not None:
+            ts = int(ts)
+        limit = int(request_values.get('limit', 10))
+        msgs = chat_model.get_msgs(channel.guid, timestamp=ts, limit=limit)
+        data = dict(status=1, data=[msg.as_dict() for msg in msgs])
+    except Exception as err:
+        logger.error('Error: %r', err)
+        data = dict(status=-1, error='{}'.format(err))
+    return jsonify(**data)
+
+@api.route('/msgs', methods=['POST', 'GET'])
+def msgs():
+    logger.debug('send_msg')
+    if request.method == 'POST':
+        return send_msg()
+    elif request.method == 'GET':
+        return get_msgs()
     abort(403)
+
 
 @api.route('/test_users', methods=['POST'])
 def create_test_users():
