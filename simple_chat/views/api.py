@@ -50,6 +50,10 @@ def signup():
                 user = user_model.create(**params)
                 return jsonify(status=1, data=dict(guid=user.guid,
                                                    user_name=user.user_name,
+                                                   display_name=user.display_name,
+                                                   age=user.age,
+                                                   gender=user.gender,
+                                                   avatar=user.avatar,
                                                    created_at=user.created_at))
         except Exception as err:
             logger.error('Error: %r', err)
@@ -76,9 +80,13 @@ def login():
                     return jsonify(
                         status=1,
                         data=dict(user_name=user.user_name,
-                                  avatar=user.avatar,
+                                  display_name=user.display_name,
+                                  age=user.age,
                                   access_token=user.access_token,
-                                  updated_at=str(user.updated_at)
+                                  gender=user.gender,
+                                  avatar=user.avatar,
+                                  updated_at=str(user.updated_at),
+                                  created_at=str(user.created_at),
                         ))
         except Exception as err:
             logger.error('Error: %r', err)
@@ -103,6 +111,9 @@ def user_list():
             users = user_model.get_list()
             data = dict(status=1, data=[dict(user_name=user.user_name,
                                       avatar=user.avatar,
+                                      gender=user.gender,
+                                      age=user.age,
+                                      display_name=user.display_name,
                                       updated_at=user.updated_at
                             ) for user in users])
         except Exception as err:
