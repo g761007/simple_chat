@@ -1,8 +1,4 @@
 from __future__ import unicode_literals
-import hmac
-
-from sqlalchemy.sql.expression import or_
-from sqlalchemy.sql.expression import func
 
 from ..utils import salt_password
 from ..utils import GuidFactory
@@ -31,6 +27,10 @@ class UserModel(BaseTableModel):
         )
         return user
 
+    def validate_access_token(self, user_name, access_token):
+        # TODO:
+        pass
+
     def get_by_access_token(self, access_token):
         """Get a user by access_token
 
@@ -43,33 +43,6 @@ class UserModel(BaseTableModel):
         )
         return user
 
-    def get_by_email(self, email):
-        """Get a user by email
-
-        """
-        user = (
-            self.session
-            .query(tables.User)
-            .filter_by(email=email)
-            .first()
-        )
-        return user
-
-    def get_by_name_or_email(self, name_or_email):
-        """Get a user by name or email
-
-        """
-        User = tables.User
-        user = (
-            self.session
-            .query(User)
-            .filter(or_(
-                func.lower(User.user_name) == name_or_email.lower(),
-                func.lower(User.email) == name_or_email.lower()
-            ))
-        )
-        return user.first()
-
     @classmethod
     def salt_password(cls, password):
         return '$'.join(salt_password(password))
@@ -79,27 +52,32 @@ class UserModel(BaseTableModel):
         user_name, 
         display_name,
         password,
-        email,
+        age,
+        gender,
         avatar='',
-        verified=False, 
+        access_token=None,
+        **kwargs
     ):
-        """Create a new user and return verification
-        
+        """Create a new user
+
         """
         user_name = user_name.lower()
-        email = email.lower()
         salted_password = self.salt_password(password)
-        
+        if not (-1 <gender < 2):
+            raise ValueError
+        if age < 0:
+            raise ValueError
         # create user
         user = tables.User(
             guid=self.guid_factory(),
             user_name=unicode(user_name),
-            email=unicode(email),
             display_name=unicode(display_name),
+            age=age,
+            gender=gender,
             avatar=avatar,
             password=salted_password,
             created_at=tables.now_func(),
-            verified=verified, 
+            updated_at=tables.now_func()
         )
         self.session.add(user)
         self.session.flush()
@@ -117,20 +95,20 @@ class UserModel(BaseTableModel):
         self, 
         user, 
         display_name=NOT_SET, 
-        email=NOT_SET,
+        age=NOT_SET,
+        gender=NOT_SET,
         access_token=NOT_SET,
         avatar=NOT_SET,
         verified=NOT_SET,
         password=NOT_SET,
-        groups=NOT_SET
     ):
         """Update attributes of a user
         
         """
         if display_name is not NOT_SET:
             user.display_name = display_name
-        if email is not NOT_SET:
-            user.email = email
+        if age is not NOT_SET and age >= 0:
+            user.age = age
         if access_token is not NOT_SET:
             user.access_token = access_token
         if verified is not NOT_SET:
@@ -139,30 +117,8 @@ class UserModel(BaseTableModel):
             user.avatar = avatar
         if password is not NOT_SET:
             user.password = self.salt_password(password) 
-        if groups is not NOT_SET:
-            user.groups = groups
+        if gender is not NOT_SET and not (-1 < gender < 2):
+            user.gender = gender
         user.updated_at = tables.now_func()
         self.session.flush()
 
-    def get_recovery_code(self, user, key):
-        """Get current recovery code of a user
-
-        """
-        h = hmac.new(key)
-        h.update('%s%s%s%s' % (
-            user.guid,
-            user.user_name,
-            user.email,
-            user.password
-        ))
-        return h.hexdigest()
-
-    def get_verification_code(self, user, verify_type, secret):
-        """Get a verification code of user
-
-        """
-        code_hash = hmac.new(secret)
-        code_hash.update(str(user.guid))
-        code_hash.update(str(user.user_name))
-        code_hash.update(str(verify_type))
-        return code_hash.hexdigest()

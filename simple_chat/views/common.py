@@ -5,10 +5,10 @@ from flask import request
 from flask import abort
 from flask import current_app
 
-from simple_chat.core import app
+from ..core import app
 
 
-"""check flask_scaffold api
+"""check simple_chat api
 
 """
 def check_api_key():

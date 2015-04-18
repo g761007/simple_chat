@@ -1,9 +1,8 @@
 from __future__ import unicode_literals
 
 from .user import UserModel
-from .group import GroupModel
-from .permission import PermissionModel
-from .chat import ChatModel
+from .message import MessageModel
+from .channel import ChannelModel
 
 
 class ModelFactory(object):
@@ -14,9 +13,8 @@ class ModelFactory(object):
         model_classes = {k: v for k, v in model_cls.items()}
         self._model_classes = dict(
             user_model=UserModel,
-            group_model=GroupModel,
-            permission_model=PermissionModel,
-            chat_model=ChatModel,
+            message_model=MessageModel,
+            channel_model=ChannelModel,
         )
         self._model_classes.update(model_classes)
 
