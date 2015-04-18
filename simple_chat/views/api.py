@@ -233,6 +233,7 @@ def get_channels():
                 u = users[c.user_id1] if c.user_id1 == user.guid \
                     else users[c.user_id2]
                 data.append({
+                    'channel_guid': c.guid,
                     'user_name': u.user_name,
                     'display_name': u.display_name,
                     'avatar': u.avatar,
