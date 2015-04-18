@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 
 from datetime import datetime
 
+from sqlalchemy import desc
+
 from ..utils import GuidFactory
 from . import tables
 from .base import BaseTableModel
@@ -26,13 +28,20 @@ class MessageModel(BaseTableModel):
         self.session.flush()
         return message
 
-    def get_msgs(self, channel_guid, timestamp=None, limit=10):
+    def get_msgs(self, channel_guid, timestamp=None, direct=-1, limit=10):
         dt = datetime.fromtimestamp(timestamp) \
             if timestamp is not None else datetime.now()
-        return self.session\
+        query = self.session\
             .query(self.TABLE)\
-            .filter_by(channel_guid=channel_guid)\
-            .filter(self.TABLE.created_at<=dt)\
-            .order_by(self.TABLE.created_at)\
-            .limit(limit)
+            .filter_by(channel_guid=channel_guid)
+        if direct < 0:
+            return query\
+                .filter(self.TABLE.created_at<=dt)\
+                .order_by(desc(self.TABLE.created_at))\
+                .limit(limit)
+        else:
+            return query\
+                .filter(self.TABLE.created_at>=dt)\
+                .order_by(desc(self.TABLE.created_at))\
+                .limit(limit)
 

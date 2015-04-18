@@ -165,7 +165,11 @@ def get_msgs():
         if ts is not None:
             ts = int(ts)
         limit = int(request_values.get('limit', 10))
-        msgs = message_model.get_msgs(channel.guid, timestamp=ts, limit=limit)
+        direct = int(request_values.get('direct', -1))
+        msgs = message_model.get_msgs(channel.guid,
+                                      timestamp=ts,
+                                      limit=limit,
+                                      direct=direct)
         data = dict(status=1, data=[msg.as_dict() for msg in msgs])
     except Exception as err:
         logger.error('Error: %r', err)
