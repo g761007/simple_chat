@@ -14,10 +14,10 @@ APIs
 ## 使用者登入 [POST] /login
 
 ### 參數
-
-user_name: string # user's account
-
-password: string # user's password
+名稱 | 型態 | 說明
+---- |----- | -----
+user_name | string | user's account
+password | string | user's password
 
 ### 回應
 ```
@@ -37,7 +37,9 @@ password: string # user's password
 ## 使用者清單 [GET] /users
 
 ### 參數
-access_token: string  # 自己的access token
+名稱 | 型態 | 說明
+---- |----- | -----
+access_token | string | 自己的access token
 
 ### 回應
 ```
@@ -67,11 +69,11 @@ access_token: string  # 自己的access token
 ## 傳送訊息 [POST] /msgs
 
 ### 參數
-access_token: string # 自己的access token
-
-user_name: string # 接收者user_name
-
-msg: string # 訊息
+名稱 | 型態 | 說明
+---- |----- | -----
+access_token | string | 自己的access token
+user_name | string | 接收者user_name
+msg | string | 訊息
 
 ### 回應
 ```
@@ -99,13 +101,15 @@ msg: string # 訊息
 ## 取得聊天訊息 [GET] /msgs
 
 ### 參數
-access_token: string # 自己的access token
+名稱 | 型態 | 說明
+---- |----- | -----
+access_token | string | 自己的access token
 
-user_name: string # 接收者user_name
+user_name | string | 接收者user_name
 
-ts: int # 時間戳記, optional
+ts | int | 時間戳記, optional
 
-limit: int # 筆數, optional, default=10
+limit | int | 筆數, optional, default=10
 
 ### 回應
 
