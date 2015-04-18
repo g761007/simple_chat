@@ -174,8 +174,9 @@ msg | string | 訊息
 ---- |----- | -----
 access_token | string | 自己的access token
 user_name | string | 接收者user_name
-ts | int | 時間戳記, optional
-limit | int | 筆數, optional, default=10
+ts | int | optional
+direct | int | optional, default = -1
+limit | int | optional, default=10
 
 #### 回應
 
