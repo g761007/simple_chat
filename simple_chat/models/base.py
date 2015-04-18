@@ -58,3 +58,14 @@ class BaseTableModel(object):
         if limit is not None:
             query = query.limit(limit)
         return query
+
+    def count(self, ids=None):
+        from sqlalchemy.orm import class_mapper
+        query = (
+            self.session
+            .query(self.TABLE)
+        )
+        if ids is not None:
+            pk = class_mapper(self.TABLE).primary_key[0]
+            query = query.filter(pk.in_(ids))
+        return query.count()

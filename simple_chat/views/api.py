@@ -108,14 +108,18 @@ def user_list():
                 owner = user_model.get_by_access_token(access_token)
                 if not owner:
                     return jsonify(status=0, error='Error access token')
-            users = user_model.get_list()
-            data = dict(status=1, data=[dict(user_name=user.user_name,
-                                      avatar=user.avatar,
-                                      gender=user.gender,
-                                      age=user.age,
-                                      display_name=user.display_name,
-                                      updated_at=user.updated_at
-                            ) for user in users])
+            offset = request_values.get('offset', 0)
+            limit = request_values.get('limit', 10)
+            users = user_model.get_list(offset=offset, limit=limit)
+            data = dict(status=1,
+                        total=user_model.count(),
+                        data=[dict(user_name=user.user_name,
+                                   avatar=user.avatar,
+                                   gender=user.gender,
+                                   age=user.age,
+                                   display_name=user.display_name,
+                                   updated_at=user.updated_at
+                        ) for user in users])
         except Exception as err:
             logger.error('Error: %r', err)
             data = dict(status=-1, error='{}'.format(err))
@@ -184,7 +188,9 @@ def get_msgs():
                                       timestamp=ts,
                                       limit=limit,
                                       direct=direct)
-        data = dict(status=1, data=[msg.as_dict() for msg in msgs])
+        data = dict(status=1,
+                    total=len(channel.msgs),
+                    data=[msg.as_dict() for msg in msgs])
     except Exception as err:
         logger.error('Error: %r', err)
         data = dict(status=-1, error='{}'.format(err))
