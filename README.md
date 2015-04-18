@@ -114,8 +114,8 @@ password | string |
 名稱 | 型態 | 說明
 ---- |----- | -----
 access_token | string | 自己的access token
-offset | int | 預設 = 0
-limit| int | 預設 = 10
+offset | int | optional, 預設 = 0
+limit| int | optional, 預設 = 10
 
 #### 回應
 ```
