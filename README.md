@@ -23,6 +23,8 @@ gender | int | 使用者性別 0:女生, 1:男生
 avatar | string | 使用者大頭照網址
 direct | int | 方向性, -1:往後, 1:往前
 ts | int | 時間戳記
+offset | int | 第N筆
+limit | int | 筆數
 
 
 ## APIs
@@ -34,6 +36,7 @@ API | 方法 | URL
 使用者清單 | GET | /users
 傳送訊息 | POST | /msgs
 取得訊息 | GET | /msgs
+我的聊天室頻道(TODO) | GET | /channels
 
 
 ### 取得API版本 [GET] /version
@@ -111,6 +114,8 @@ password | string |
 名稱 | 型態 | 說明
 ---- |----- | -----
 access_token | string | 自己的access token
+offset | int | 預設 = 0
+limit| int | 預設 = 10
 
 #### 回應
 ```
@@ -133,6 +138,7 @@ access_token | string | 自己的access token
             "user_name": "yoyo3"
         }
     ],
+    "total":2,
     "status": 1
 }
 ```
@@ -166,6 +172,7 @@ msg | string | 訊息
             "user_guid": "USKs7pozenwxXSo6e8nBk9jy"
         }
     ],
+    "total": 2,
     "status": 1
 }
 ```
