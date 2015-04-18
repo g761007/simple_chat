@@ -36,7 +36,7 @@ API | 方法 | URL
 使用者清單 | GET | /users
 傳送訊息 | POST | /msgs
 取得訊息 | GET | /msgs
-我的聊天室頻道(TODO) | GET | /channels
+我的聊天室頻道 | GET | /channels
 
 
 ### 取得API版本 [GET] /version
@@ -156,23 +156,13 @@ msg | string | 訊息
 #### 回應
 ```
 {
-    "data": [
-        {
-            "channel_guid": "CU6zqc5MYMuB5ghT8awcEef",
-            "created_at": "Fri, 17 Apr 2015 13:30:04 GMT",
-            "guid": "MU73vpG5Z4qTWKhquqn5u95",
-            "msg": "fuck fuck fuck",
-            "user_guid": "USKs7pozenwxXSo6e8nBk9jy"
-        },
-        {
-            "channel_guid": "CU6zqc5MYMuB5ghT8awcEef",
-            "created_at": "Fri, 17 Apr 2015 13:30:11 GMT",
-            "guid": "MUdEogH21srAcnwtQgBvy6B",
-            "msg": "fuck fuck fuck fuck",
-            "user_guid": "USKs7pozenwxXSo6e8nBk9jy"
-        }
-    ],
-    "total": 2,
+    "data": {
+        "channel_guid": "CDiHzTHLB687sQYcxcz1ZVD",
+        "created_at": "Sat, 18 Apr 2015 10:56:21 GMT",
+        "guid": "MJN4PxCCajJHgKBFhrDH7J3",
+        "msg": "asdfsadfffffff",
+        "user_guid": "USA8M3BSXNcG2EEJz8ZCen3M"
+    },
     "status": 1
 }
 ```
@@ -210,6 +200,35 @@ limit | int | 筆數, optional, default=10
             "user_guid": "USKs7pozenwxXSo6e8nBk9jy"
         }
     ],
+    "total": 2,
     "status": 1
+}
+```
+
+### 我的聊天室頻道  [GET] /channels
+
+#### 參數
+名稱 | 型態 | 說明
+---- |----- | -----
+access_token | string | 自己的access token
+
+#### 回應
+
+```
+{
+    "data": [
+        {
+            "age": 65,
+            "avatar": "http://z.m.ipimg.com/-150c-/8/D/8/7/0/4/1/B/8D87041BE46F9711B4BBA88B3409C1EB.jpg",
+            "created": "Sat, 18 Apr 2015 08:46:27 GMT",
+            "display_name": "yoyo5",
+            "channel_guid": "CDiHzTHLB687sQYcxcz1ZVD",
+            "gender": 0,
+            "msgs": 4,
+            "user_name": "yoyo5"
+        }
+    ],
+    "status": 1,
+    "total": 1
 }
 ```
