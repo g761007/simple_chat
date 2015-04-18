@@ -196,6 +196,7 @@ def get_msgs():
         data = dict(status=-1, error='{}'.format(err))
     return jsonify(**data)
 
+
 @api.route('/msgs', methods=['POST', 'GET'])
 def msgs():
     logger.debug('send_msg')
@@ -203,6 +204,47 @@ def msgs():
         return send_msg()
     elif request.method == 'GET':
         return get_msgs()
+    abort(403)
+
+
+@api.route('/channels', methods=['GET'])
+def get_channels():
+    logger.debug('get channels')
+    if request.method == 'GET':
+        try:
+            request_values = request.values
+            user_model = model_factory.user_model
+            access_token = request_values['access_token']
+            user = user_model.get_by_access_token(access_token)
+            if not user:
+                return jsonify(status=0, error='Error access token')
+            channel_model = model_factory.channel_model
+            channels = list(channel_model.get_channels_by_user_id(user.guid))
+            user_ids = set()
+            for c in channels:
+                user_ids.add(c.user_id1)
+                user_ids.add(c.user_id2)
+            user_ids.remove(user.guid)
+            users = dict()
+            for u in user_model.get_list(ids=user_ids):
+                users[user.guid] = u
+            data = []
+            for c in channels:
+                u = users[c.user_id1] if c.user_id1 == user.guid \
+                    else users[c.user_id2]
+                data.append({
+                    'user_name': u.user_name,
+                    'display_name': u.display_name,
+                    'avatar': u.avatar,
+                    'gender': u.gender,
+                    'age': u.age,
+                    'msgs': len(c.msgs),
+                    'created': c.created_at,
+                })
+            return jsonify(status=1, data=data, total=len(channels))
+        except Exception as err:
+            logger.error('Error: %r', err)
+            return jsonify(status=-1, error='{}'.format(err))
     abort(403)
 
 
