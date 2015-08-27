@@ -136,8 +136,10 @@ def send_msg():
             access_token = request_form['access_token']
             poster = user_model.get_by_access_token(access_token)
             if not poster:
-                return jsonify(status=0, error='Error access token')
+                return jsonify(status=0, error='access token error')
             user_name = request_form['user_name']
+            if poster.user_name == user_name:
+                return jsonify(status=0, error='user_name error')
             receiver = user_model.get_by_name(user_name)
             if not receiver:
                 return jsonify(status=0, error='No user:%s' % user_name)
@@ -150,9 +152,13 @@ def send_msg():
                                                        receiver.guid)
             msg = request_form.get('msg')
             message = message_model.add_msg(poster=poster,
-                                         channel=channel,
-                                         msg=msg)
-            data = dict(status=1, data=message.as_dict())
+                                            channel=channel,
+                                            msg=msg)
+            data = dict(status=1, data=dict(guid=message.guid,
+                                            msg=message.msg,
+                                            create_at=message.created_at,
+                                            channel_guid=message.channel_guid,
+                                            user_name=poster.user_name))
     except Exception as err:
         logger.error('Error: %r', err)
         data = dict(status=-1, error='{}'.format(err))
@@ -190,7 +196,11 @@ def get_msgs():
                                       direct=direct)
         data = dict(status=1,
                     total=len(channel.msgs),
-                    data=[msg.as_dict() for msg in msgs])
+                    data=[dict(guid=msg.guid,
+                               msg=msg.msg,
+                               created_at=msg.created_at,
+                               channel_guid=msg.channel_guid,
+                               user_name=receiver.user_name if msg.user_guid == receiver.guid else user.user_name) for msg in msgs])
     except Exception as err:
         logger.error('Error: %r', err)
         data = dict(status=-1, error='{}'.format(err))
