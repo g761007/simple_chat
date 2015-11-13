@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+import time
+import datetime
 import logging
 logger = logging.getLogger(__name__)
 
@@ -157,6 +159,7 @@ def send_msg():
             data = dict(status=1, data=dict(guid=message.guid,
                                             msg=message.msg,
                                             create_at=message.created_at,
+                                            ts=time.mktime(message.created_at.utctimetuple()),
                                             channel_guid=message.channel_guid,
                                             user_name=poster.user_name))
     except Exception as err:
@@ -198,6 +201,7 @@ def get_msgs():
                     total=len(channel.msgs),
                     data=[dict(guid=msg.guid,
                                msg=msg.msg,
+                               ts=time.mktime(msg.created_at.utctimetuple()),
                                created_at=msg.created_at,
                                channel_guid=msg.channel_guid,
                                user_name=receiver.user_name if msg.user_guid == receiver.guid else user.user_name) for msg in msgs])
