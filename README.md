@@ -158,6 +158,7 @@ msg | string | 訊息
 {
     "data": {
         "channel_guid": "CDiHzTHLB687sQYcxcz1ZVD",
+        "ts": 1447395832,
         "created_at": "Sat, 18 Apr 2015 10:56:21 GMT",
         "guid": "MJN4PxCCajJHgKBFhrDH7J3",
         "msg": "asdfsadfffffff",
@@ -186,12 +187,14 @@ limit | int | optional, default=10
         {
             "channel_guid": "CU6zqc5MYMuB5ghT8awcEef",
             "created_at": "Fri, 17 Apr 2015 13:30:04 GMT",
+            "ts": 1447395832,
             "guid": "MU73vpG5Z4qTWKhquqn5u95",
             "msg": "fuck fuck fuck",
             "user_name": "Daniel"
         },
         {
             "channel_guid": "CU6zqc5MYMuB5ghT8awcEef",
+            "ts": 1447395833,
             "created_at": "Fri, 17 Apr 2015 13:30:11 GMT",
             "guid": "MUdEogH21srAcnwtQgBvy6B",
             "msg": "fuck fuck fuck fuck",
